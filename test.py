@@ -20,6 +20,11 @@ pygame.init()
 
 
 leds = [LED(2), LED(3), LED(23), LED(24), LED(25)]
+
+for led in leds:
+    del led
+del leds
+
 def led_blink(n):
     leds[n].on()
     time.sleep(0.1)
