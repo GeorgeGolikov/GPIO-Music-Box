@@ -10,6 +10,8 @@ from test import Action, led_blink
 
 pygame.init()
 
+FILE_TO_SHARE_PATH = "/share_test.txt"
+
 class Switcher:
     def __init__(self):
         self.__dict = {10: False, 9: False, 11: False}
@@ -17,15 +19,19 @@ class Switcher:
         self.__dict[switch_num] = val
     def change_state(self, device):
         self.__dict[device.pin.number] = device.is_pressed
-    def play(self):
+    def play(self, file):                    
         counter = 0
+        list_of_states = [0,0,0,5]
         while True:
             for key, val in self.__dict.items():
-                counter += 1
                 if val:
-                    print(counter, sep='\t', end='')
-            counter = 0    
-            print(counter)
+                    list_of_states[counter] = 1
+                else:
+                    list_of_states[counter] = 0
+                counter += 1
+                for state in list_of_states:
+                        file.write(state)
+            counter = 0
             time.sleep(1)
 
 # switches_actions = {Button(10): Action("/home/pi/gpio-music-box/samples/drum_snare_hard.wav", 2),
@@ -40,5 +46,8 @@ for switch in switches:
     switch.when_pressed = switcher.change_state
     switch.when_released = switcher.change_state
     
-switcher.play()
+with open(FILE_TO_SHARE_PATH, "w") as file_to_share:
+    file_to_share.write('0 0 0 5')
+
+switcher.play(file_to_share)
     
