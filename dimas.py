@@ -1,3 +1,6 @@
+#with open("//192.168.137.222/switches-info/test.py") as test_file:
+#    for line in test_file:
+#        print(line)
 import math
 
 import pyaudio
@@ -13,6 +16,7 @@ delayT = 0.5
 dist = False
 robot = False
 delay = False
+FILE_TO_SHARE_PATH = "//192.168.137.222/switches-info/file_to_share.txt"
 
 
 p = pyaudio.PyAudio()
@@ -27,7 +31,7 @@ for i in range(int(LEN * RATE / CHUNK)):  # go for a LEN seconds
     player.write(data, CHUNK)
 
 while True:
-    f = open('text', 'r+')  # ВОТ ТЕКСТОВЫЙ ФАЙЛИК, ТУТ МЕНЯТЬ НАДО
+    f = open(FILE_TO_SHARE_PATH, 'r+')  # ВОТ ТЕКСТОВЫЙ ФАЙЛИК, ТУТ МЕНЯТЬ НАДО
     lines = f.read().split(' ')
     f.close()
     if lines[0] == '1':
