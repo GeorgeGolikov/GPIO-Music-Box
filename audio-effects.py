@@ -4,11 +4,8 @@ import pyaudio
 import numpy as np
 from queue import Queue
 
-from paramiko import SSHClient
-from scp import SCPClient
-
 CHUNK = 32
-RATE = 48000
+RATE = 44100
 LEN = 0.9
 f0 = 400
 n = 0
@@ -16,19 +13,7 @@ delayT = 0.5
 dist = False
 robot = False
 delay = False
-server = '192.168.137.222'
-username = 'pi'
-password = 'raspberry'
-server_path = '/home/pi/gpio-music-box/file_to_share.txt'
-local_path = 'D:\\microprocessors_file'
 share_file_path = 'D:\\microprocessors_file\\file_to_share.txt'
-
-# ssh connect with RaspberryPi
-ssh = SSHClient()
-ssh.load_system_host_keys()
-ssh.connect(server, username=username, password=password)
-# SCPCLient takes a paramiko transport as an argument
-scp = SCPClient(ssh.get_transport())
 
 p = pyaudio.PyAudio()
 stream = p.open(format=pyaudio.paInt16, channels=1, rate=RATE, input=True, frames_per_buffer=CHUNK)
@@ -42,23 +27,23 @@ for i in range(int(LEN * RATE / CHUNK)):  # go for a LEN seconds
     player.write(data, CHUNK)
 
 while True:
-    scp.get(server_path, local_path)
     f = open(share_file_path, 'r')
     lines = f.read().split(' ')
     f.close()
-    if lines[0] == '1':
-        dist = True
-    else:
-        dist = False
-    if lines[1] == '1':
-        robot = True
-    else:
-        robot = False
-    if lines[2] == '1':
-        delay = True
-    else:
-        delay = False
-    delayT = int(lines[3])/10
+    if len(lines) > 1:
+        if lines[0] == '1':
+            dist = True
+        else:
+            dist = False
+        if lines[1] == '1':
+            robot = True
+        else:
+            robot = False
+        if lines[2] == '1':
+            delay = True
+        else:
+            delay = False
+        delayT = int(lines[3])/10
     print(delayT)
 
     for i in range(int(0.3 * RATE / CHUNK)):
@@ -81,7 +66,6 @@ while True:
             q.put(data)
         player.write(data, CHUNK)
 
-scp.close()
 stream.stop_stream()
 stream.close()
 p.terminate()
