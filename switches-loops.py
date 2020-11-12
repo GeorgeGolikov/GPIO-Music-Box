@@ -23,6 +23,7 @@ NUM_LEDS_SWITCHES = 3
 leds = [LED(2), LED(3), LED(23)]
 switches = [Button(10), Button(9), Button(11)]
 buttons = [Button(4), Button(17)]
+leds_for_buts = [LED(24), LED(25)]
 
 for i in range(NUM_LEDS_SWITCHES):
     leds[i].value = switches[i].value
@@ -52,16 +53,22 @@ def change_volume(device):
     if pin_num == 4:
         if 0 < val < 8:
             file.write(str(val+1))
+            leds_for_buts[0].blink(on_time=0.5, off_time=0.5, n=1)
+        else:
+            leds_for_buts[0].blink(on_time=0.3, off_time=0.2, n=3)
     if pin_num == 17:
         if 1 < val < 9:
             file.write(str(val-1))
+            leds_for_buts[1].blink(on_time=0.5, off_time=0.5, n=1)
+        else:
+            leds_for_buts[1].blink(on_time=0.3, off_time=0.2, n=3)
     file.close()
 
 file_to_share = open(FILE_TO_SHARE_PATH, 'w')
 for switch in switches:
     file_to_share.write(str(int(switch.is_pressed)))
     file_to_share.write(' ')
-file_to_share.write('8')
+file_to_share.write('1')
 file_to_share.close()
 
 for switch in switches:
