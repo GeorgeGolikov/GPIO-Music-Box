@@ -53,15 +53,15 @@ def change_volume(device):
     if pin_num == 4:
         if 0 < val < 8:
             file.write(str(val+1))
-            leds_for_buts[0].blink(on_time=0.5, off_time=0.5, n=1)
+            leds_for_buts[0].blink(on_time=0.2, off_time=0.2, n=1)
         else:
-            leds_for_buts[0].blink(on_time=0.3, off_time=0.2, n=3)
+            leds_for_buts[0].blink(on_time=0.1, off_time=0.1, n=3)
     if pin_num == 17:
         if 1 < val < 9:
             file.write(str(val-1))
-            leds_for_buts[1].blink(on_time=0.5, off_time=0.5, n=1)
+            leds_for_buts[1].blink(on_time=0.2, off_time=0.2, n=1)
         else:
-            leds_for_buts[1].blink(on_time=0.3, off_time=0.2, n=3)
+            leds_for_buts[1].blink(on_time=0.1, off_time=0.1, n=3)
     file.close()
 
 file_to_share = open(FILE_TO_SHARE_PATH, 'w')
