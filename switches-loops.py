@@ -3,42 +3,77 @@
 # 2 - 9
 # 3 - 11
 
+# buttons - gpios
+# 1 - 4
+# 2 - 17
+
+# leds - gpios
+# 1 - 2
+# 2 - 3
+# 3 - 23
+
 import pygame
-import time
 from gpiozero import Button, LED
-from test import Action, led_blink
 
 pygame.init()
 
-class Switcher:
-    def __init__(self):
-        self.__dict = {10: False, 9: False, 11: False}
-    def set_state(self, switch_num, val):
-        self.__dict[switch_num] = val
-    def change_state(self, device):
-        self.__dict[device.pin.number] = device.is_pressed
-    def play(self):
-        counter = 0
-        while True:
-            for key, val in self.__dict.items():
-                counter += 1
-                if val:
-                    print(counter, sep='\t', end='')
-            counter = 0    
-            print(counter)
-            time.sleep(1)
+FILE_TO_SHARE_PATH = "./file_to_share.txt"
+NUM_LEDS_SWITCHES = 3
 
-# switches_actions = {Button(10): Action("/home/pi/gpio-music-box/samples/drum_snare_hard.wav", 2),
-#                     Button(9): Action("/home/pi/gpio-music-box/samples/drum_cowbell.wav", 3),
-#                     Button(11): Action("/home/pi/gpio-music-box/samples/bd_fat.wav", 4)}
-switcher = Switcher()
+leds = [LED(2), LED(3), LED(23)]
 switches = [Button(10), Button(9), Button(11)]
+buttons = [Button(4), Button(17)]
+leds_for_buts = [LED(24), LED(25)]
+
+for i in range(NUM_LEDS_SWITCHES):
+    leds[i].value = switches[i].value
+
+def change_effect(device):
+    pin_num = device.pin.number
+    file = open(FILE_TO_SHARE_PATH, 'r+')
+    if pin_num == 10:
+        file.seek(0)
+        leds[0].toggle()
+    if pin_num == 9:        
+        file.seek(2)
+        leds[1].toggle()
+    if pin_num == 11:
+        file.seek(4)
+        leds[2].toggle()
+    file.write(str(int(device.is_pressed)))
+    file.close()
+    
+def change_volume(device):
+    pin_num = device.pin.number
+    file = open(FILE_TO_SHARE_PATH, 'r+')
+    file.seek(6)
+    val = int(file.read())
+    file.seek(6)
+    print(val)
+    if pin_num == 4:
+        if 0 < val < 8:
+            file.write(str(val+1))
+            leds_for_buts[0].blink(on_time=0.2, off_time=0.2, n=1)
+        else:
+            leds_for_buts[0].blink(on_time=0.1, off_time=0.1, n=3)
+    if pin_num == 17:
+        if 1 < val < 9:
+            file.write(str(val-1))
+            leds_for_buts[1].blink(on_time=0.2, off_time=0.2, n=1)
+        else:
+            leds_for_buts[1].blink(on_time=0.1, off_time=0.1, n=3)
+    file.close()
+
+file_to_share = open(FILE_TO_SHARE_PATH, 'w')
 for switch in switches:
-    switcher.set_state(switch.pin.number, switch.is_pressed)
+    file_to_share.write(str(int(switch.is_pressed)))
+    file_to_share.write(' ')
+file_to_share.write('1')
+file_to_share.close()
 
 for switch in switches:
-    switch.when_pressed = switcher.change_state
-    switch.when_released = switcher.change_state
+    switch.when_pressed = change_effect
+    switch.when_released = change_effect
     
-switcher.play()
-    
+for button in buttons:
+    button.when_pressed = change_volume

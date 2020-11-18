@@ -5,7 +5,7 @@ import numpy as np
 from queue import Queue
 
 CHUNK = 32
-RATE = 48000
+RATE = 44100
 LEN = 0.9
 f0 = 400
 n = 0
@@ -13,7 +13,7 @@ delayT = 0.5
 dist = False
 robot = False
 delay = False
-
+share_file_path = 'D:\\microprocessors_file\\file_to_share.txt'
 
 p = pyaudio.PyAudio()
 stream = p.open(format=pyaudio.paInt16, channels=1, rate=RATE, input=True, frames_per_buffer=CHUNK)
@@ -27,22 +27,23 @@ for i in range(int(LEN * RATE / CHUNK)):  # go for a LEN seconds
     player.write(data, CHUNK)
 
 while True:
-    f = open('text', 'r+')  # ВОТ ТЕКСТОВЫЙ ФАЙЛИК, ТУТ МЕНЯТЬ НАДО
+    f = open(share_file_path, 'r')
     lines = f.read().split(' ')
     f.close()
-    if lines[0] == '1':
-        dist = True
-    else:
-        dist = False
-    if lines[1] == '1':
-        robot = True
-    else:
-        robot = False
-    if lines[2] == '1':
-        delay = True
-    else:
-        delay = False
-    delayT = int(lines[3])/10
+    if len(lines) > 1:
+        if lines[0] == '1':
+            dist = True
+        else:
+            dist = False
+        if lines[1] == '1':
+            robot = True
+        else:
+            robot = False
+        if lines[2] == '1':
+            delay = True
+        else:
+            delay = False
+        delayT = int(lines[3])/10
     print(delayT)
 
     for i in range(int(0.3 * RATE / CHUNK)):
@@ -68,5 +69,3 @@ while True:
 stream.stop_stream()
 stream.close()
 p.terminate()
-
-
