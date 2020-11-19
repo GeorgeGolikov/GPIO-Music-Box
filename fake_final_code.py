@@ -14,7 +14,7 @@
 # 3 - 23
 
 import pygame  # импорт библиотеки для игрофикация
-# импорт классов для светдодиодов, переключателей и кнопок, чтобы соединить их со скриптом
+# импорт классов для светодиодов, переключателей и кнопок, чтобы соединить их со скриптом
 from gpiozero import Button, LED
 import math
 import pyaudio
@@ -79,54 +79,37 @@ for i in range(int(LEN * RATE / CHUNK)):  # go for a LEN seconds
 # принимает объект переключателя в качестве аргумента
 def change_effect(device):
     pin_num = device.pin.number  # номер порта gpio
-    file = open(FILE_TO_SHARE_PATH, 'r+')
     if pin_num == 10:
-        file.seek(0)
+        dist = device.is_pressed
         leds[0].toggle()  # изменить состояние 1-го светодиода
     if pin_num == 9:
-        file.seek(2)
+        robot = device.is_pressed
         leds[1].toggle()  # изменить состояние 2-го светодиода
     if pin_num == 11:
-        file.seek(4)
+        delay = device.is_pressed
         leds[2].toggle()  # изменить состояние 3-го светодиода
-    file.write(str(int(device.is_pressed)))
-    file.close()
 
 
 # функция для изменения длины эха при нажатии кнопки
 # принимает объект кнопки в качестве аргумента
 def change_volume(device):
     pin_num = device.pin.number
-    file = open(FILE_TO_SHARE_PATH, 'r+')
-    file.seek(6)
-    val = int(file.read())
-    file.seek(6)
-    print(val)
     if pin_num == 4:
-        if 0 < val < 8:
-            file.write(str(val + 1))
+        if 0 < delayT < 8:
+            delayT += 1
             # светодиод мигает 1 раз при нажатии на кнопку
             leds_for_buts[0].blink(on_time=0.2, off_time=0.2, n=1)
         else:
             # светодиод мигает 3 раза при достижении верхнего порога
             leds_for_buts[0].blink(on_time=0.1, off_time=0.1, n=3)
     if pin_num == 17:
-        if 1 < val < 9:
-            file.write(str(val - 1))
+        if 1 < delayT < 9:
+            delayT -= 1
             # светодиод мигает 1 раз при нажатии на кнопку
             leds_for_buts[1].blink(on_time=0.2, off_time=0.2, n=1)
         else:
             # светодиод мигает 3 раза при достижении нижнего порога
             leds_for_buts[1].blink(on_time=0.1, off_time=0.1, n=3)
-    file.close()
-
-
-file_to_share = open(FILE_TO_SHARE_PATH, 'w')
-for switch in switches:
-    file_to_share.write(str(int(switch.is_pressed)))
-    file_to_share.write(' ')
-file_to_share.write('1')
-file_to_share.close()
 
 # Обратные вызовы Python
 # Подключиние события переключателей к написанным выше функциям
@@ -140,12 +123,6 @@ for button in buttons:
     button.when_pressed = change_volume
 
 while True:
-
-    # dist = ?
-    # robot = ?
-    # delay = ?
-    # delayT = ?
-
     # читаем из выходного потока новые данные
     data = np.fromstring(stream.read(CHUNK), dtype=np.int16)
     # изменяем коэффициент для робота
